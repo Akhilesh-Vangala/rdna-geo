@@ -14,16 +14,19 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STUDY_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # ------------------------------------------------------------------------------
 # Configuration — override via environment variables if needed
 # ------------------------------------------------------------------------------
-RDNA_REF="${RDNA_REF:-1000_genome_project_referencerDNA.fa}"
-FASTQ_DIR="${FASTQ_DIR:-./fastq}"
-BAM_DIR="${BAM_DIR:-./rdna_bams}"
-LOG_DIR="${LOG_DIR:-./logs}"
-RUN_LIST="${RUN_LIST:-run_list.txt}"
+RDNA_REF="${RDNA_REF:-$STUDY_ROOT/1000_genome_project_referencerDNA.fa}"
+FASTQ_DIR="${FASTQ_DIR:-$STUDY_ROOT/fastq}"
+BAM_DIR="${BAM_DIR:-$STUDY_ROOT/rdna_bams}"
+LOG_DIR="${LOG_DIR:-$STUDY_ROOT/logs}"
+RUN_LIST="${RUN_LIST:-$STUDY_ROOT/data/run_list.txt}"
 THREADS="${THREADS:-4}"
-KEEP_FASTQ="${KEEP_FASTQ:-false}"   # set to true to keep FASTQ after alignment
+KEEP_FASTQ="${KEEP_FASTQ:-false}"
 
 # ------------------------------------------------------------------------------
 # Logging

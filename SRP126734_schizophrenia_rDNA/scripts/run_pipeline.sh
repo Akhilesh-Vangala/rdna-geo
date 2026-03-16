@@ -20,7 +20,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_DIR="${LOG_DIR:-$SCRIPT_DIR/logs}"
+STUDY_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="${LOG_DIR:-$STUDY_ROOT/logs}"
 mkdir -p "$LOG_DIR"
 LOGFILE="$LOG_DIR/master_$(date +%Y%m%d_%H%M%S).log"
 

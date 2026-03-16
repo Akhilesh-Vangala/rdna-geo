@@ -17,13 +17,16 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STUDY_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # ------------------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------------------
-RDNA_REF="${RDNA_REF:-1000_genome_project_referencerDNA.fa}"
-BAM_DIR="${BAM_DIR:-./rdna_bams}"
-VCF_DIR="${VCF_DIR:-./vcfs}"
-LOG_DIR="${LOG_DIR:-./logs}"
+RDNA_REF="${RDNA_REF:-$STUDY_ROOT/1000_genome_project_referencerDNA.fa}"
+BAM_DIR="${BAM_DIR:-$STUDY_ROOT/rdna_bams}"
+VCF_DIR="${VCF_DIR:-$STUDY_ROOT/vcfs}"
+LOG_DIR="${LOG_DIR:-$STUDY_ROOT/logs}"
 THREADS="${THREADS:-4}"
 
 mkdir -p "$VCF_DIR" "$LOG_DIR"

@@ -1,9 +1,9 @@
-# GEO / public datasets — rDNA extraction
+# rDNA and disease — GEO / SRA
 
-This folder holds rDNA work for **publicly available sequencing datasets** (e.g. GEO, SRA), separate from the All of Us project.
+rDNA extraction and analysis from publicly available sequencing data (NCBI GEO/SRA). Separate from the All of Us project.
 
-**Current study:**
+## Studies
 
-- **SRP126734_schizophrenia_rDNA/** — Schizophrenia vs control WGS (GSE108065). Run list, metadata, pipeline to download and extract sequences mapping to the rDNA. See [SRP126734_schizophrenia_rDNA/README.md](SRP126734_schizophrenia_rDNA/README.md).
+- **SRP126734_schizophrenia_rDNA** — Schizophrenia vs control WGS (GSE108065). 54 samples. Pipeline: download from SRA, align to rDNA reference, extract rDNA-mapping reads; optional variant calling. See [SRP126734_schizophrenia_rDNA/README.md](SRP126734_schizophrenia_rDNA/README.md).
 
-Other public studies can be added as further subfolders (e.g. `geo/ANOTHER_ACCESSION/`) as needed.
+Further studies can be added as additional subfolders.
