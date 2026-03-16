@@ -1,0 +1,18 @@
+# Large sequencing data
+*.fastq
+*.fastq.gz
+*.bam
+*.cram
+*.vcf
+*.vcf.gz
+*.fa
+*.fasta
+*.sra
+ncbi/
+fastq/
+rdna_bams/
+vcfs/
+tmp/
+temp/
+logs/
+.DS_Store
