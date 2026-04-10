@@ -53,7 +53,3 @@ Try, in order:
 4. **`USE_PREFETCH=true`** — downloads the `.sra` with `prefetch` into `sra_cache/`, then runs `fasterq-dump` on the **local file** (works when direct streaming fails). **Warning:** one WGS run can be **many GB**.
 
 Also update SRA Toolkit (`brew upgrade sra-tools`) and retry on a network that allows NCBI.
-
-## Relation to All of Us
-
-All of Us: CRAM → FASTQ → align to same rDNA reference → variant calling → VCF. Here: SRA (FASTQ) → same alignment and optional variant calling. Downstream: phenotype + rDNA variants → burden/association and ML.

@@ -1,10 +1,10 @@
 # rDNA and disease — GEO / SRA
 
-rDNA extraction and analysis from publicly available sequencing data (NCBI GEO/SRA). Separate from the All of Us project.
+rDNA extraction and analysis from publicly available sequencing data (NCBI GEO/SRA).
 
 ## Studies
 
-- **SRP126734_schizophrenia_rDNA** — Schizophrenia vs control WGS (GSE108065). 54 samples. Pipeline: SRA → FASTQ → BWA to lab rDNA FASTA → rDNA BAMs; optional **bcftools** or **GATK** variant calling (`variant_calling.sh`). Run records and requirements notes are under `docs/`. See [SRP126734_schizophrenia_rDNA/README.md](SRP126734_schizophrenia_rDNA/README.md).
+- **SRP126734_schizophrenia_rDNA** — Schizophrenia vs control WGS (GSE108065). 54 samples. SRA → rDNA BAMs; optional **bcftools** or **GATK** VCFs. See [SRP126734_schizophrenia_rDNA/README.md](SRP126734_schizophrenia_rDNA/README.md).
 
 Further studies can be added as additional subfolders.
 
