@@ -6,6 +6,7 @@
 #   ./download_and_extract_rdna.sh                     # process all runs in run_list.txt
 #   ./download_and_extract_rdna.sh -s SRR6375927       # process a single run
 #   RDNA_REF=/path/to/ref.fa ./download_and_extract_rdna.sh
+#   FASTQ_MAX_SPOTS=20000 RDNA_REF=... ./download_and_extract_rdna.sh -s SRR6375927   # pilot (uses fastq-dump -X; fasterq-dump has no maxSpotId)
 #
 # Requirements:
 #   sra-tools (fasterq-dump), bwa, samtools
@@ -27,6 +28,18 @@ LOG_DIR="${LOG_DIR:-$STUDY_ROOT/logs}"
 RUN_LIST="${RUN_LIST:-$STUDY_ROOT/data/run_list.txt}"
 THREADS="${THREADS:-4}"
 KEEP_FASTQ="${KEEP_FASTQ:-false}"
+# Optional: limit spots for fasterq-dump (pilot / testing only; not full WGS)
+FASTQ_MAX_SPOTS="${FASTQ_MAX_SPOTS:-}"
+# If fasterq-dump fails with "Failed to call external services", try:
+#   USE_PREFETCH=true   (prefetch .sra to disk, then fasterq-dump the local file)
+SRA_CACHE_DIR="${SRA_CACHE_DIR:-$STUDY_ROOT/sra_cache}"
+USE_PREFETCH="${USE_PREFETCH:-false}"
+# Force Homebrew sra-tools if conda shadows a broken binary:
+#   FASTERQ_DUMP=/opt/homebrew/bin/fasterq-dump PREFETCH=/opt/homebrew/bin/prefetch ./scripts/...
+FASTERQ_DUMP="${FASTERQ_DUMP:-}"
+PREFETCH="${PREFETCH:-}"
+# Pilot mode (FASTQ_MAX_SPOTS): fasterq-dump has NO --maxSpotId; we use fastq-dump -X instead.
+FASTQ_DUMP="${FASTQ_DUMP:-}"
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -52,7 +65,9 @@ check_tool() {
 }
 check_tool bwa
 check_tool samtools
-if command -v fasterq-dump &>/dev/null; then
+if [[ -n "$FASTERQ_DUMP" && -x "$FASTERQ_DUMP" ]]; then
+  SRA_DUMP="$FASTERQ_DUMP"
+elif command -v fasterq-dump &>/dev/null; then
   SRA_DUMP="fasterq-dump"
 elif command -v fastq-dump &>/dev/null; then
   SRA_DUMP="fastq-dump"
@@ -61,6 +76,14 @@ else
   exit 1
 fi
 log "Using SRA tool: $SRA_DUMP"
+PREFETCH_EXE="${PREFETCH:-}"
+if [[ -z "$PREFETCH_EXE" ]]; then
+  PREFETCH_EXE="$(command -v prefetch 2>/dev/null || true)"
+fi
+FASTQ_DUMP_EXE="${FASTQ_DUMP:-}"
+if [[ -z "$FASTQ_DUMP_EXE" ]]; then
+  FASTQ_DUMP_EXE="$(command -v fastq-dump 2>/dev/null || true)"
+fi
 
 # ------------------------------------------------------------------------------
 # Reference check and indexing
@@ -101,11 +124,43 @@ process_run() {
 
   # Download FASTQ
   log "$srr — downloading from SRA..."
-  if [[ "$SRA_DUMP" == "fasterq-dump" ]]; then
-    fasterq-dump "$srr" --split-files -O "$FASTQ_DIR" --threads "$THREADS" 2>>"$run_log" \
-      || { err "$srr — fasterq-dump failed"; return 1; }
+  local sra_local=""
+  if [[ "$USE_PREFETCH" == "true" ]]; then
+    if [[ -z "$PREFETCH_EXE" ]]; then
+      err "USE_PREFETCH=true but prefetch not found"
+      return 1
+    fi
+    mkdir -p "$SRA_CACHE_DIR"
+    sra_local="$(find "$SRA_CACHE_DIR" -name "${srr}.sra" -type f 2>/dev/null | head -1)"
+    if [[ -z "$sra_local" ]]; then
+      log "$srr — prefetch → $SRA_CACHE_DIR (large; may take a long time)..."
+      "$PREFETCH_EXE" -O "$SRA_CACHE_DIR" "$srr" >>"$run_log" 2>&1 || { err "$srr — prefetch failed"; return 1; }
+      sra_local="$(find "$SRA_CACHE_DIR" -name "${srr}.sra" -type f 2>/dev/null | head -1)"
+    fi
+    if [[ -z "$sra_local" || ! -f "$sra_local" ]]; then
+      err "$srr — prefetch did not produce ${srr}.sra under $SRA_CACHE_DIR"
+      return 1
+    fi
+    log "$srr — using local SRA: $sra_local"
+  fi
+
+  local dump_src="$srr"
+  [[ -n "$sra_local" ]] && dump_src="$sra_local"
+
+  # FASTQ_MAX_SPOTS: only fastq-dump supports -X / --maxSpotId (not fasterq-dump 3.3+)
+  if [[ -n "$FASTQ_MAX_SPOTS" ]]; then
+    if [[ -z "$FASTQ_DUMP_EXE" ]]; then
+      err "FASTQ_MAX_SPOTS set but fastq-dump not found. Install sra-tools or unset FASTQ_MAX_SPOTS."
+      return 1
+    fi
+    log "$srr — fastq-dump pilot: -X $FASTQ_MAX_SPOTS (fasterq-dump has no maxSpotId flag)"
+    "$FASTQ_DUMP_EXE" "$dump_src" --split-files --outdir "$FASTQ_DIR" -X "$FASTQ_MAX_SPOTS" >>"$run_log" 2>&1 \
+      || { err "$srr — fastq-dump failed"; return 1; }
+  elif [[ "$SRA_DUMP" == *fasterq-dump* ]] || [[ "$(basename "$SRA_DUMP")" == "fasterq-dump" ]]; then
+    "$SRA_DUMP" "$dump_src" --split-files -O "$FASTQ_DIR" --threads "$THREADS" >>"$run_log" 2>&1 \
+      || { err "$srr — fasterq-dump failed (try USE_PREFETCH=true if 'external services')"; return 1; }
   else
-    fastq-dump "$srr" --split-files --outdir "$FASTQ_DIR" 2>>"$run_log" \
+    "$SRA_DUMP" "$dump_src" --split-files --outdir "$FASTQ_DIR" >>"$run_log" 2>&1 \
       || { err "$srr — fastq-dump failed"; return 1; }
   fi
 

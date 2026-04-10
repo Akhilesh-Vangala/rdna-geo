@@ -1,18 +1,41 @@
-# Large sequencing data
+# Large sequencing data files — never commit these
 *.fastq
 *.fastq.gz
+*.fq
+*.fq.gz
 *.bam
+*.bam.bai
 *.cram
+*.cram.crai
 *.vcf
 *.vcf.gz
+*.vcf.gz.tbi
+*.bcf
+
+# Reference genome (obtain from lab / collaborators)
 *.fa
 *.fasta
+*.fna
+*.fa.bwt
+*.fa.pac
+*.fa.ann
+*.fa.amb
+*.fa.sa
+*.fasta.bwt
+*.fasta.pac
+*.fasta.ann
+*.fasta.amb
+*.fasta.sa
+
 *.sra
 ncbi/
 fastq/
 rdna_bams/
 vcfs/
+sra_cache/
 tmp/
 temp/
+*_tmp/
 logs/
+
 .DS_Store

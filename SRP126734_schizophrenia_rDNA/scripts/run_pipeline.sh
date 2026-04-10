@@ -4,7 +4,7 @@
 #
 # Runs the full pipeline end-to-end:
 #   Step 1: Download SRA data + extract rDNA-mapping reads → BAMs
-#   Step 2: Variant calling on rDNA BAMs → VCFs  (stub, awaiting collaborator scripts)
+#   Step 2: Variant calling on rDNA BAMs → VCFs (default: bcftools; VARIANT_CALLER=gatk optional)
 #
 # Usage:
 #   ./run_pipeline.sh                   # full run (all 54 samples)
@@ -13,8 +13,8 @@
 #   SKIP_STEP2=true ./run_pipeline.sh   # run download only
 #
 # Requirements:
-#   sra-tools, bwa, samtools
-#   conda install -c bioconda sra-tools bwa samtools
+#   sra-tools, bwa, samtools, bcftools (step 2)
+#   conda install -c bioconda sra-tools bwa samtools bcftools
 # ==============================================================================
 
 set -euo pipefail
